@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- The backend runs on plain HTTP on a local machine, so cleartext is allowed for this demo.
+     A production client would remove this file and use HTTPS. -->
+<network-security-config>
+    <base-config cleartextTrafficPermitted="true" />
+</network-security-config>

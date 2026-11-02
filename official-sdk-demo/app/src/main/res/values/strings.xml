@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">EngageLab Demo</string>
+    <string name="heading">EngageLab AppPush SDK</string>
+    <string name="connection_title">Connection</string>
+    <string name="connected">Connected to EngageLab</string>
+    <string name="not_connected">Connecting…</string>
+    <string name="registration_title">Registration ID</string>
+    <string name="no_registration_id">Waiting for the SDK</string>
+    <string name="copy">Copy Registration ID</string>
+    <string name="copied">Copied</string>
+    <string name="event_title">Latest push</string>
+    <string name="no_event">None yet. Send a notification from the EngageLab console.</string>
+    <string name="event_arrived">Received: %1$s\n%2$s</string>
+    <string name="event_clicked">Tapped: %1$s\n%2$s</string>
+</resources>

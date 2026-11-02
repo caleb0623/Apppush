@@ -1,0 +1,56 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">AppPush Demo</string>
+
+    <string name="app_tagline">Messages sent from your AppPush console</string>
+    <string name="language_toggle">中文</string>
+    <string name="language_switch">Switch language</string>
+    <string name="section_messages">Messages</string>
+    <string name="section_connection">Connection</string>
+    <string name="backend_url">Backend URL</string>
+    <string name="app_key">AppKey</string>
+    <string name="save_and_register">Save and register</string>
+    <string name="test_connection">Test backend connection</string>
+    <string name="enable_notifications">Allow notifications</string>
+    <string name="no_message_yet">No messages yet. Send one from the console and it will appear here.</string>
+
+    <string name="status_ready">Ready to receive messages</string>
+    <string name="status_setup">Setup needed</string>
+    <string name="status_not_registered">Not registered yet</string>
+    <string name="status_no_backend">Backend not reachable</string>
+    <string name="status_notifications_off">Notifications are off</string>
+
+    <string name="firebase_missing">Firebase is not set up. Add google-services.json to android/app and rebuild. See docs/firebase-setup.md.</string>
+    <string name="app_key_missing">Enter the AppKey from the console in Connection, then press Save and register.</string>
+    <string name="permission_denied">Notifications are off, so messages arrive here but cannot appear on your screen.</string>
+    <string name="backend_unreachable">The backend could not be reached, so receipts and taps are waiting to be sent. Messages from Firebase can still arrive.</string>
+
+    <string name="detail_firebase">Firebase: %1$s</string>
+    <string name="detail_notifications">Notifications: %1$s</string>
+    <string name="detail_token">FCM token: %1$s</string>
+    <string name="detail_registration">Registration ID: %1$s</string>
+    <string name="value_ready">ready</string>
+    <string name="value_configured">configured</string>
+    <string name="value_not_configured">not configured</string>
+    <string name="value_allowed">allowed</string>
+    <string name="value_not_allowed">not allowed</string>
+    <string name="value_none_yet">none yet</string>
+    <string name="value_not_registered">not registered</string>
+
+    <string name="registering">Registering…</string>
+    <string name="registered">Registered with the backend.</string>
+    <string name="registration_failed">Registration failed: %1$s</string>
+    <string name="connecting">Connecting…</string>
+    <string name="connection_failed">Connection failed: %1$s</string>
+    <string name="connected_to">Connected to %1$s (%2$s)</string>
+    <string name="backend_fcm">FCM on the backend: %1$s</string>
+    <string name="this_device">This device: %1$s</string>
+    <string name="device_registered">registered, token %1$s</string>
+
+    <string name="message_notification">Notification</string>
+    <string name="message_in_app">In-app message</string>
+    <string name="message_custom">Custom message</string>
+    <string name="message_details">%1$s, %2$s</string>
+    <string name="just_now">just now</string>
+    <string name="click_reported">Tap sent to the console</string>
+</resources>

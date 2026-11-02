@@ -1,0 +1,56 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">AppPush 演示</string>
+
+    <string name="app_tagline">来自 AppPush 控制台的消息</string>
+    <string name="language_toggle">English</string>
+    <string name="language_switch">切换语言</string>
+    <string name="section_messages">消息</string>
+    <string name="section_connection">连接</string>
+    <string name="backend_url">后端地址</string>
+    <string name="app_key">AppKey</string>
+    <string name="save_and_register">保存并注册</string>
+    <string name="test_connection">测试后端连接</string>
+    <string name="enable_notifications">允许通知</string>
+    <string name="no_message_yet">还没有消息。从控制台发送一条，就会显示在这里。</string>
+
+    <string name="status_ready">可以接收消息</string>
+    <string name="status_setup">需要设置</string>
+    <string name="status_not_registered">尚未注册</string>
+    <string name="status_no_backend">无法连接后端</string>
+    <string name="status_notifications_off">通知已关闭</string>
+
+    <string name="firebase_missing">Firebase 尚未设置。请把 google-services.json 放到 android/app 后重新构建。见 docs/firebase-setup.md。</string>
+    <string name="app_key_missing">请在“连接”中填写控制台的 AppKey，然后点“保存并注册”。</string>
+    <string name="permission_denied">通知已关闭，消息能到达这里，但不会显示在屏幕上。</string>
+    <string name="backend_unreachable">无法连接后端，回执和点击记录正等待发送。Firebase 的消息仍可到达。</string>
+
+    <string name="detail_firebase">Firebase：%1$s</string>
+    <string name="detail_notifications">通知：%1$s</string>
+    <string name="detail_token">FCM 令牌：%1$s</string>
+    <string name="detail_registration">注册 ID：%1$s</string>
+    <string name="value_ready">就绪</string>
+    <string name="value_configured">已配置</string>
+    <string name="value_not_configured">未配置</string>
+    <string name="value_allowed">已允许</string>
+    <string name="value_not_allowed">未允许</string>
+    <string name="value_none_yet">暂无</string>
+    <string name="value_not_registered">未注册</string>
+
+    <string name="registering">正在注册…</string>
+    <string name="registered">已在后端注册。</string>
+    <string name="registration_failed">注册失败：%1$s</string>
+    <string name="connecting">正在连接…</string>
+    <string name="connection_failed">连接失败：%1$s</string>
+    <string name="connected_to">已连接到 %1$s（%2$s）</string>
+    <string name="backend_fcm">后端 FCM：%1$s</string>
+    <string name="this_device">此设备：%1$s</string>
+    <string name="device_registered">已注册，令牌 %1$s</string>
+
+    <string name="message_notification">通知</string>
+    <string name="message_in_app">应用内消息</string>
+    <string name="message_custom">自定义消息</string>
+    <string name="message_details">%1$s，%2$s</string>
+    <string name="just_now">刚刚</string>
+    <string name="click_reported">点击已上报到控制台</string>
+</resources>

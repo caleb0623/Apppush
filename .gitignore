@@ -1,0 +1,32 @@
+node_modules/
+dist/
+coverage/
+*.log
+.env
+.env.local
+.local/
+*.tsbuildinfo
+.vscode/*
+!.vscode/extensions.json
+e2e/screenshots/
+
+# Firebase credentials must never be committed.
+backend/secrets/
+*service-account*.json
+*firebase-adminsdk*.json
+google-services.json
+
+# Android
+android/.gradle/
+android/.idea/
+android/.kotlin/
+android/build/
+android/app/build/
+android/apppush-sdk/build/
+android/local.properties
+android/captures/
+*.apk
+*.aab
+*.keystore
+*.jks
+android/keystore.properties

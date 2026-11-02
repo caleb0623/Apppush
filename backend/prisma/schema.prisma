@@ -1,0 +1,420 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "mysql"
+  url      = env("DATABASE_URL")
+}
+
+enum UserRole {
+  ADMIN
+  VIEWER
+}
+
+enum AppStatus {
+  ACTIVE
+  INACTIVE
+}
+
+enum EnvironmentType {
+  PRODUCTION
+  TESTING
+}
+
+enum CredentialStatus {
+  ACTIVE
+  REVOKED
+}
+
+enum Platform {
+  ANDROID
+  IOS
+  HARMONYOS
+}
+
+enum DeviceStatus {
+  ACTIVE
+  INACTIVE
+}
+
+enum MessageType {
+  NOTIFICATION
+  CUSTOM
+  IN_APP
+}
+
+enum NotificationStyle {
+  DEFAULT
+  THUMBNAIL
+  BIG_PICTURE
+  TEXT
+  INBOX
+  CUSTOM
+}
+
+enum DeliveryStrategy {
+  mtpush
+  fcm_mtpush
+  pns_mtpush
+  mtpush_fcm
+  mtpush_pns
+}
+
+enum AudienceType {
+  ALL
+  REGISTRATION_IDS
+  TAGS
+  ALIASES
+}
+
+enum ScheduleType {
+  IMMEDIATE
+  SCHEDULED
+}
+
+enum MessageStatus {
+  PENDING
+  PROCESSING
+  COMPLETED
+  FAILED
+  CANCELLED
+}
+
+enum JobStatus {
+  PENDING
+  PROCESSING
+  COMPLETED
+  FAILED
+  CANCELLED
+}
+
+enum TargetStatus {
+  PENDING
+  INVALID
+  SENT
+  DELIVERED
+  FAILED
+}
+
+enum AttemptOutcome {
+  DELIVERED
+  ACCEPTED
+  FAILED
+  SKIPPED
+}
+
+enum EventType {
+  SENT
+  DELIVERED
+  DISPLAYED
+  CLICKED
+}
+
+/// Who produced a funnel event. Only DEVICE_CLIENT proves that a phone did something.
+enum EventSource {
+  DELIVERY_SIMULATOR
+  MANUAL_SIMULATION
+  PROVIDER
+  DEVICE_CLIENT
+}
+
+enum DeliveryMode {
+  REAL
+  SIMULATED
+}
+
+enum PushTokenStatus {
+  ACTIVE
+  INVALID
+}
+
+model AdminUser {
+  id           Int        @id @default(autoincrement())
+  email        String     @unique @db.VarChar(191)
+  name         String     @db.VarChar(100)
+  passwordHash String     @db.VarChar(100)
+  role         UserRole   @default(ADMIN)
+  isActive     Boolean    @default(true)
+  lastLoginAt  DateTime?
+  createdAt    DateTime   @default(now())
+  updatedAt    DateTime   @updatedAt
+  auditLogs    AuditLog[]
+}
+
+/// Metadata shared by every environment of an application. It is stored once,
+/// so production and testing can never disagree on it.
+model Application {
+  id               Int              @id @default(autoincrement())
+  name             String           @db.VarChar(100)
+  description      String?          @db.VarChar(500)
+  iconUrl          String?          @db.VarChar(500)
+  isVip            Boolean          @default(false)
+  serviceValidUntil DateTime?
+  timezone         String           @default("Asia/Shanghai") @db.VarChar(64)
+  status           AppStatus        @default(ACTIVE)
+  createdAt        DateTime         @default(now())
+  updatedAt        DateTime         @updatedAt
+  environments     AppEnvironment[]
+
+  @@index([status])
+  @@index([name])
+}
+
+/// A deployable environment of an application: its own AppKey, Master Secret,
+/// settings, devices, tags and messages.
+model AppEnvironment {
+  id              Int               @id @default(autoincrement())
+  applicationId   Int
+  type            EnvironmentType
+  appKey          String            @unique @db.VarChar(40)
+  callbackUrl     String?           @db.VarChar(500)
+  callbackEnabled Boolean           @default(false)
+  ipAllowlist     Json
+  enabledChannels Json
+  simulatorConfig Json
+  createdAt       DateTime          @default(now())
+  updatedAt       DateTime          @updatedAt
+  application     Application       @relation(fields: [applicationId], references: [id], onDelete: Restrict)
+  credentials     AppCredential[]
+  devices         Device[]
+  tags            Tag[]
+  aliases         Alias[]
+  messages        PushMessage[]
+
+  @@unique([applicationId, type])
+}
+
+/// One row per Master Secret generation. Only the keyed hash is stored.
+model AppCredential {
+  id            Int              @id @default(autoincrement())
+  environmentId Int
+  secretHash    String           @unique @db.VarChar(64)
+  secretHint    String           @db.VarChar(8)
+  status        CredentialStatus @default(ACTIVE)
+  createdAt     DateTime         @default(now())
+  revokedAt     DateTime?
+  environment   AppEnvironment   @relation(fields: [environmentId], references: [id], onDelete: Cascade)
+
+  @@index([environmentId, status])
+}
+
+model Device {
+  id             Int             @id @default(autoincrement())
+  environmentId  Int
+  registrationId String          @unique @db.VarChar(64)
+  platform       Platform
+  vendor         String?         @db.VarChar(32)
+  model          String?         @db.VarChar(64)
+  osVersion      String?         @db.VarChar(32)
+  appVersion     String          @db.VarChar(32)
+  status         DeviceStatus    @default(ACTIVE)
+  online         Boolean         @default(false)
+  lastActiveAt   DateTime?
+  aliasId        Int?
+  /// Stable ID from the app. Devices without one are simulated records.
+  installationId String?         @db.VarChar(64)
+  /// FCM registration token. Sensitive: it is never returned by the API.
+  pushToken      String?         @db.VarChar(512)
+  pushTokenStatus PushTokenStatus?
+  pushTokenUpdatedAt DateTime?
+  /// Whether the user allows notifications, as last reported by the app.
+  notificationsEnabled Boolean?
+  /// Keyed hash of the per-device secret used by the client API.
+  deviceSecretHash String?       @db.VarChar(64)
+  createdAt      DateTime        @default(now())
+  updatedAt      DateTime        @updatedAt
+  environment    AppEnvironment  @relation(fields: [environmentId], references: [id], onDelete: Cascade)
+  alias          Alias?          @relation(fields: [aliasId], references: [id], onDelete: SetNull)
+  tags           DeviceTag[]
+  targets        MessageTarget[]
+
+  @@unique([environmentId, installationId])
+  @@unique([environmentId, pushToken])
+  @@index([environmentId, platform])
+  @@index([environmentId, status])
+  @@index([environmentId, lastActiveAt])
+  @@index([aliasId])
+}
+
+model Tag {
+  id            Int            @id @default(autoincrement())
+  environmentId Int
+  name          String         @db.VarChar(64)
+  createdAt     DateTime       @default(now())
+  environment   AppEnvironment @relation(fields: [environmentId], references: [id], onDelete: Cascade)
+  devices       DeviceTag[]
+
+  @@unique([environmentId, name])
+}
+
+model DeviceTag {
+  deviceId   Int
+  tagId      Int
+  assignedAt DateTime @default(now())
+  device     Device   @relation(fields: [deviceId], references: [id], onDelete: Cascade)
+  tag        Tag      @relation(fields: [tagId], references: [id], onDelete: Cascade)
+
+  @@id([deviceId, tagId])
+  @@index([tagId])
+}
+
+model Alias {
+  id            Int            @id @default(autoincrement())
+  environmentId Int
+  name          String         @db.VarChar(64)
+  createdAt     DateTime       @default(now())
+  environment   AppEnvironment @relation(fields: [environmentId], references: [id], onDelete: Cascade)
+  devices       Device[]
+
+  @@unique([environmentId, name])
+}
+
+model PushMessage {
+  id             Int                @id @default(autoincrement())
+  msgid          String             @unique @db.VarChar(32)
+  environmentId  Int
+  type           MessageType
+  title          String?            @db.VarChar(200)
+  body           String?            @db.Text
+  style          NotificationStyle  @default(DEFAULT)
+  styleConfig    Json?
+  customPayload  Json?
+  platforms      Json
+  audienceType   AudienceType
+  audience       Json
+  strategy       DeliveryStrategy
+  /// When set, only this channel is tried, instead of the strategy's chain.
+  channelOverride String?           @db.VarChar(16)
+  scheduleType   ScheduleType       @default(IMMEDIATE)
+  scheduledAt    DateTime?
+  status         MessageStatus      @default(PENDING)
+  failureReason  String?            @db.VarChar(255)
+  isSimulated    Boolean            @default(true)
+  idempotencyKey String?            @db.VarChar(128)
+  requestHash    String             @db.VarChar(64)
+  createdById    Int?
+  dispatchedAt   DateTime?
+  completedAt    DateTime?
+  createdAt      DateTime           @default(now())
+  updatedAt      DateTime           @updatedAt
+  environment    AppEnvironment     @relation(fields: [environmentId], references: [id], onDelete: Cascade)
+  job            ScheduledJob?
+  targets        MessageTarget[]
+
+  @@unique([environmentId, idempotencyKey])
+  @@index([environmentId, createdAt])
+  @@index([environmentId, status])
+  @@index([environmentId, dispatchedAt])
+}
+
+/// One row per message and intended recipient. It snapshots device attributes
+/// so history survives device deletion, and it is the unit analytics count.
+model MessageTarget {
+  id             Int              @id @default(autoincrement())
+  messageId      Int
+  deviceId       Int?
+  registrationId String           @db.VarChar(80)
+  platform       Platform?
+  vendor         String?          @db.VarChar(32)
+  appVersion     String?          @db.VarChar(32)
+  online         Boolean          @default(false)
+  deliveryMode   DeliveryMode     @default(SIMULATED)
+  isValid        Boolean
+  invalidReason  String?          @db.VarChar(64)
+  status         TargetStatus     @default(PENDING)
+  finalChannel   String?          @db.VarChar(16)
+  failureReason  String?          @db.VarChar(255)
+  createdAt      DateTime         @default(now())
+  updatedAt      DateTime         @updatedAt
+  message        PushMessage      @relation(fields: [messageId], references: [id], onDelete: Cascade)
+  device         Device?          @relation(fields: [deviceId], references: [id], onDelete: SetNull)
+  attempts       DeliveryAttempt[]
+  events         MessageEvent[]
+
+  @@unique([messageId, registrationId])
+  @@index([messageId, status])
+  @@index([deviceId])
+}
+
+/// Every channel call or skip. There may be several per target, so analytics
+/// never counts funnel stages from this table.
+model DeliveryAttempt {
+  id                Int            @id @default(autoincrement())
+  targetId          Int
+  attemptNo         Int
+  channel           String         @db.VarChar(16)
+  provider          String         @db.VarChar(64)
+  isFallback        Boolean        @default(false)
+  isSimulated       Boolean        @default(true)
+  outcome           AttemptOutcome
+  failureReason     String?        @db.VarChar(255)
+  providerMessageId String?        @db.VarChar(255)
+  /// Raw outcome from a real provider: its message name, or its error code and message.
+  providerResponse  Json?
+  attemptedAt       DateTime
+  target            MessageTarget  @relation(fields: [targetId], references: [id], onDelete: Cascade)
+
+  @@unique([targetId, attemptNo])
+  @@index([channel, outcome])
+}
+
+/// Funnel facts. The unique key makes each stage count at most once per target.
+model MessageEvent {
+  id         Int           @id @default(autoincrement())
+  targetId   Int
+  type       EventType
+  source     EventSource
+  channel    String?       @db.VarChar(16)
+  /// True when no report named this stage and a later stage proved it happened.
+  inferred   Boolean       @default(false)
+  occurredAt DateTime
+  createdAt  DateTime      @default(now())
+  target     MessageTarget @relation(fields: [targetId], references: [id], onDelete: Cascade)
+
+  @@unique([targetId, type])
+  @@index([type, occurredAt])
+}
+
+/// Durable work item for every message. Immediate messages run inline in the
+/// API, and the worker picks up anything left behind.
+model ScheduledJob {
+  id          Int         @id @default(autoincrement())
+  messageId   Int         @unique
+  runAt       DateTime
+  status      JobStatus   @default(PENDING)
+  lockedBy    String?     @db.VarChar(64)
+  lockedAt    DateTime?
+  attempts    Int         @default(0)
+  maxAttempts Int         @default(3)
+  lastError   String?     @db.VarChar(500)
+  completedAt DateTime?
+  createdAt   DateTime    @default(now())
+  updatedAt   DateTime    @updatedAt
+  message     PushMessage @relation(fields: [messageId], references: [id], onDelete: Cascade)
+
+  @@index([status, runAt])
+  @@index([status, lockedAt])
+}
+
+model WorkerHeartbeat {
+  workerId   String   @id @db.VarChar(64)
+  lastBeatAt DateTime
+  startedAt  DateTime
+}
+
+model AuditLog {
+  id          Int        @id @default(autoincrement())
+  actorUserId Int?
+  actorLabel  String     @db.VarChar(191)
+  action      String     @db.VarChar(64)
+  entityType  String     @db.VarChar(32)
+  entityId    String     @db.VarChar(64)
+  metadata    Json?
+  ipAddress   String?    @db.VarChar(64)
+  createdAt   DateTime   @default(now())
+  actor       AdminUser? @relation(fields: [actorUserId], references: [id], onDelete: SetNull)
+
+  @@index([entityType, entityId])
+  @@index([createdAt])
+}

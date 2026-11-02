@@ -1,0 +1,35 @@
+plugins {
+    id 'com.android.application'
+}
+
+android {
+    namespace 'com.caleb.engagelab.official'
+    compileSdk 33
+    buildToolsVersion '33.0.0'
+
+    defaultConfig {
+        // Must equal the package name saved in the EngageLab console.
+        applicationId 'com.caleb.engagelab.official'
+        minSdk 23
+        targetSdk 33
+        versionCode 1
+        versionName '1.0.0'
+
+        manifestPlaceholders = [
+                // The console's AppKey. It belongs to the package name above.
+                ENGAGELAB_PRIVATES_APPKEY : 'a7b5119601594486bafbb59f',
+                ENGAGELAB_PRIVATES_CHANNEL: 'developer',
+                // The process the SDK runs in. It must start with a colon.
+                ENGAGELAB_PRIVATES_PROCESS: ':remote',
+        ]
+    }
+
+    compileOptions {
+        sourceCompatibility JavaVersion.VERSION_1_8
+        targetCompatibility JavaVersion.VERSION_1_8
+    }
+}
+
+dependencies {
+    implementation fileTree(include: ['*.aar'], dir: 'libs')
+}
